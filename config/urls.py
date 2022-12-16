@@ -14,8 +14,42 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
+from main.views import post_list, create_post, update_post, delete_post, filter_by_user, search, toggle_like
+from review.views import CommentViewSet
+
+
+router = DefaultRouter()
+router.register('comments', CommentViewSet)
+
+
+"""'==============Swagger docs=============='"""
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+swagger_view = get_schema_view(
+    openapi.Info(
+        title='Blog API',
+        default_version='v1',
+        description='blog API'
+    )
+)
+
+"""========================================"""
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('docs/', swagger_view.with_ui('swagger', cache_timeout=0)),
+    path('posts/', post_list),
+    path('post-create/', create_post),
+    path('post-update/<int:id>/', update_post),
+    path('post-delete/<int:id>/', delete_post),
+    path('post-filter/<int:u_id>/', filter_by_user),
+    path('post-search/', search),
+    path('post-like/', toggle_like),
+    path('', include(router.urls)),
+    path('account/', include('main.urls')),
 ]
